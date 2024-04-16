@@ -6,6 +6,8 @@ from sys import argv
 
 
 def get_employee(id=None):
+    """ API returns information about the tasks """
+
     if len(argv) > 1:
         try:
             id = int(argv[1])
