@@ -2,6 +2,7 @@
 """ API REST """
 
 import requests
+import json
 import csv
 from sys import argv
 
@@ -14,28 +15,42 @@ def get_employee(id=None):
             return
 
     if isinstance(id, int):
-        base = "https://jsonplaceholder.typicode.com"
-        user = requests.get(f"{base}/users/{id}").json()
-        to_dos = requests.get(f"{base}/todos/?userId={id}").json()
+        user = requests.get(f"https://jsonplaceholder.typicode.com/users/{id}")
+        to_dos = requests.get(
+            f"https://jsonplaceholder.typicode.com/todos/?userId={id}")
 
-        if user and to_dos:
-            user_id = user["id"]
-            username = user["username"]
+        if to_dos.status_code == 200 and user.status_code == 200:
+            user = json.loads(user.text)
+            to_dos = json.loads(to_dos.text)
 
-            csv_filename = f"{user_id}.csv"
+            total_tasks = len(to_dos)
+            tasks_completed = 0
+            titles_completed = []
+            csv_rows = []
+            user_id = id
 
-            with open(csv_filename, mode="w", newline="") as csv_file:
-                csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_MINIMAL)
-                csv.writer.writerow(["USER_ID", "USERNAME",
-                                     "TASK_COMPLETED_STATUS", "TASK_TITLE"])
+            for to_do in to_dos:
+                csv_rows.append(
+                    [user_id, user['username'],
+                     to_do['completed'],
+                     to_do['title']
+                     ]
+                )
 
-                for task in to_dos:
-                    task_completed = task["completed"]
-                    task_title = task["title"]
-                    csv_writer.writerow([user_id, username,
-                                         str(task_completed), task_title])
+                if to_do['completed'] is True:
+                    tasks_completed += 1
+                    titles_completed.append(to_do['title'])
 
-            print(f"Exported data to {csv_filename}")
+            tasks_completed = len(titles_completed)
+
+            print(f"Employee {user['name']} is done \
+                  wth tasks({tasks_completed}/{total_tasks})")
+            for title in titles_completed:
+                print(f"\t {title}")
+
+            with open(f"{user_id}.csv", 'w', newline='') as csv_file:
+                writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+                writer.writerows(csv_rows)
 
 
 if __name__ == "__main__":
