@@ -11,7 +11,7 @@ def get_employee(id=None):
             id = int(argv[1])
         except ValueError:
             return
-        
+
     if isinstance(id, int):
         base = "https://jsonplaceholder.typicode.com"
         user = requests.get(f"{base}/users/{id}").json()
@@ -22,7 +22,7 @@ def get_employee(id=None):
             titles_completed = [task["title"]
                                 for task in to_dos
                                 if task["completed"]]
-            
+
             tasks_completed = len(titles_completed)
 
             print(
@@ -33,6 +33,7 @@ def get_employee(id=None):
 
             for title in titles_completed:
                 print(f"\t {title}")
+
 
 if __name__ == "__main__":
     get_employee()
