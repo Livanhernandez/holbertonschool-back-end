@@ -13,6 +13,7 @@ def get_employee(id=None):
         try:
             id = int(argv[1])
         except ValueError:
+            pass
             return
 
     if isinstance(id, int):
@@ -26,26 +27,31 @@ def get_employee(id=None):
             user_data = json.loads(user_response.text)
             todos_data = json.loads(todos_response.text)
 
-            tasks_list = []
-            for todo in todos_data:
-                task_info = {
-                    "task": todo["title"],
-                    "completed": todo["completed"],
-                    "username": user_data["username"]
-                }
-                tasks_list.append(task_info)
+            total_tasks = len(todos_data)
+            tasks_completed = 0
+            titles_completed = []
 
-            user_id = id
-            tasks_dict = {str(user_id): tasks_list}
+            for todo in todos_data:
+                if todo['completed'] is True:
+                    tasks_completed += 1
+                    titles_completed.append(todo['title'])
 
             print(
                 f"Employee {user_data['name']} is done with tasks(
-                    {len(tasks_list)}/{len(todos_data)})")
-            for task in tasks_list:
-                print(f"\t{task['task']} (Completed: {task['completed']})")
+                    {len(tasks_completed)}/{len(total_tasks)})")
+            for title in titles_completed:
+                print(f"\t {title}")
 
-            with open(f"{user_id}.json", 'w') as json_file:
-                json.dump(tasks_dict, json_file, indent=4)
+            json_dict = {user_data['id']: []}
+            for task in todos_data:
+                task_info = {
+                    'task': task['title'],
+                    'completed': task['completed'],
+                    'username': user_data['username']
+                }
+
+            with open(f"{user_data}.json", 'w') as json_file:
+                json.dump(json_dict, json_file)
 
 
 if __name__ == "__main__":
